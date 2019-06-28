@@ -18,40 +18,29 @@ package sample.tencent.matrix.trace;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.SystemClock;
-import android.provider.Settings;
 
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.View;
-import android.webkit.PermissionRequest;
 import android.widget.Toast;
 
-import com.tencent.matrix.AppForegroundDelegate;
 import com.tencent.matrix.Matrix;
-import com.tencent.matrix.listeners.IAppForeground;
 import com.tencent.matrix.plugin.Plugin;
 import com.tencent.matrix.trace.TracePlugin;
 import com.tencent.matrix.trace.core.AppMethodBeat;
 import com.tencent.matrix.trace.view.FrameDecorator;
 import com.tencent.matrix.util.MatrixLog;
 
-import java.security.Permission;
 
 import sample.tencent.matrix.R;
 import sample.tencent.matrix.issue.IssueFilter;
 
-import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
 
-public class TestTraceMainActivity extends Activity implements IAppForeground {
+public class TestTraceMainActivity extends Activity {
     private static String TAG = "Matrix.TestTraceMainActivity";
     FrameDecorator decorator;
-    private static final int PERMISSION_REQUEST_CODE = 0x02;
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,27 +54,7 @@ public class TestTraceMainActivity extends Activity implements IAppForeground {
             plugin.start();
         }
         decorator = FrameDecorator.create(this);
-        if (!canDrawOverlays()) {
-            requestWindowPermission();
-        } else {
-            decorator.show();
-        }
-
-        AppForegroundDelegate.INSTANCE.addListener(this);
-    }
-
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        MatrixLog.i(TAG, "requestCode:%s resultCode:%s", requestCode, resultCode);
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            if (canDrawOverlays()) {
-                decorator.show();
-            } else {
-                Toast.makeText(this, "fail to request ACTION_MANAGE_OVERLAY_PERMISSION", Toast.LENGTH_LONG).show();
-            }
-        }
+        decorator.show();
     }
 
 
@@ -97,26 +66,10 @@ public class TestTraceMainActivity extends Activity implements IAppForeground {
             MatrixLog.i(TAG, "plugin-trace stop");
             plugin.stop();
         }
-        if (canDrawOverlays()) {
-            decorator.dismiss();
-        }
-        AppForegroundDelegate.INSTANCE.removeListener(this);
+        decorator.dismiss();
     }
 
-    private boolean canDrawOverlays() {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            return Settings.canDrawOverlays(this);
-        } else {
-            return true;
-        }
-    }
-
-    private void requestWindowPermission() {
-        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:" + getPackageName()));
-        startActivityForResult(intent, PERMISSION_REQUEST_CODE);
-    }
 
 
     public void testEnter(View view) {
@@ -208,55 +161,6 @@ public class TestTraceMainActivity extends Activity implements IAppForeground {
         SystemClock.sleep(6000);
     }
 
-    private void A() {
-        B();
-        H();
-        I();
-        J();
-        SystemClock.sleep(800);
-    }
-
-    private void B() {
-        C();
-        G();
-        SystemClock.sleep(200);
-    }
-
-    private void C() {
-        D();
-        E();
-        F();
-        SystemClock.sleep(100);
-    }
-
-    private void D() {
-        SystemClock.sleep(20);
-    }
-
-    private void E() {
-        SystemClock.sleep(20);
-    }
-
-    private void F() {
-        SystemClock.sleep(20);
-    }
-
-    @Override
-    public void onForeground(boolean isForeground) {
-        if (!canDrawOverlays()) {
-            return;
-        }
-        if (!isForeground) {
-            decorator.dismiss();
-        } else {
-            decorator.show();
-        }
-        isStop = !isStop;
-    }
-
-    public void testInnerSleep() {
-        SystemClock.sleep(6000);
-    }
 
     private void tryHeavyMethod() {
         Debug.getMemoryInfo(new Debug.MemoryInfo());

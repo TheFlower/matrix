@@ -101,7 +101,7 @@ public class FrameTracer extends Tracer {
             synchronized (listeners) {
                 for (final IDoFrameListener listener : listeners) {
                     final int dropFrame = (int) (frameCostMs / frameIntervalMs);
-                    listener.doFrameSync(focusedActivityName, frameCostMs, dropFrame);
+//                    listener.doFrameSync(focusedActivityName, frameCostMs, dropFrame);
                     if (null != listener.getHandler()) {
                         listener.getHandler().post(new Runnable() {
                             @Override

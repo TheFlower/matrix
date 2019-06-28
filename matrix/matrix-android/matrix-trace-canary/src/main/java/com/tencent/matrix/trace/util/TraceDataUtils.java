@@ -98,6 +98,7 @@ public class TraceDataUtils {
 
         LinkedList<MethodItem> list = new LinkedList<>();
         MethodItem last = null;
+        //前后item按depth聚类
         for (MethodItem item : result) {
             if (null != last) {
                 int index = list.indexOf(last);
@@ -134,6 +135,7 @@ public class TraceDataUtils {
         if (!resultStack.isEmpty()) {
             last = resultStack.peek();
         }
+        //todo:聚类不够完整，目前看只是将新item和list上一个item比较
         if (null != last && last.methodId == item.methodId && last.depth == item.depth && 0 != item.depth) {
             item.durTime = item.durTime == Constants.DEFAULT_ANR ? last.durTime : item.durTime;
             last.mergeMore(item.durTime);
